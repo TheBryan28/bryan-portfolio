@@ -1,122 +1,189 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import './index.css';
+import { Taskbar } from './components/Taskbar';
+import { DesktopIcon } from './components/DesktopIcon';
+import { ProfileWindow } from './components/Windows/ProfileWindow';
+import { TerminalWindow } from './components/Windows/TerminalWindow';
+import { ProjectsWindow } from './components/Windows/ProjectsWindow';
+import { ContactCTAWindow } from './components/Windows/ContactCTAWindow';
+import wallpaper from './assets/wallpaper-xp.png';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [openWindows, setOpenWindows] = useState<Record<string, boolean>>({
+    profile: true,
+    terminal: true,
+    projects: false,
+    contact: false,
+  });
+
+  const [minimizedWindows, setMinimizedWindows] = useState<Record<string, boolean>>({});
+  const [maximizedWindows, setMaximizedWindows] = useState<Record<string, boolean>>({});
+  const [activeWindow, setActiveWindow] = useState<string>('terminal');
+  const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
+
+  const toggleWindow = (id: string) => {
+    if (!openWindows[id]) {
+      // If closed, open it and focus
+      setOpenWindows(prev => ({ ...prev, [id]: true }));
+      setMinimizedWindows(prev => ({ ...prev, [id]: false }));
+      setActiveWindow(id);
+    } else {
+      // If open
+      if (activeWindow === id && !minimizedWindows[id]) {
+        // If active and not minimized, minimize it
+        setMinimizedWindows(prev => ({ ...prev, [id]: true }));
+      } else {
+        // If not active or minimized, restore and focus
+        setMinimizedWindows(prev => ({ ...prev, [id]: false }));
+        setActiveWindow(id);
+      }
+    }
+  };
+
+  const closeWindow = (id: string) => {
+    setOpenWindows(prev => ({ ...prev, [id]: false }));
+    if (activeWindow === id) setActiveWindow('');
+  };
+
+  const minimizeWindow = (id: string) => {
+    setMinimizedWindows(prev => ({ ...prev, [id]: true }));
+    if (activeWindow === id) setActiveWindow('');
+  };
+
+  const toggleMaximize = (id: string) => {
+    setMaximizedWindows(prev => ({ ...prev, [id]: !prev[id] }));
+    setActiveWindow(id);
+  };
+
+  const bringToFront = (id: string) => {
+    setActiveWindow(id);
+    setSelectedIcon(null);
+    if (minimizedWindows[id]) {
+      setMinimizedWindows(prev => ({ ...prev, [id]: false }));
+    }
+  };
+
+  const handleDesktopClick = () => {
+    setSelectedIcon(null);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div 
+      onClick={handleDesktopClick}
+      style={{ 
+        width: '100vw', 
+        height: '100vh', 
+        position: 'relative', 
+        backgroundImage: `url(${wallpaper})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      
+      {/* Desktop Area (everything except taskbar) */}
+      <div style={{ flexGrow: 1, position: 'relative', width: '100%', overflow: 'hidden' }}>
+        
+        {/* Desktop Icons */}
+        <div style={{ 
+          padding: '20px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '20px', 
+          width: 'fit-content',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 1
+        }}>
 
-      <div className="ticks"></div>
+        <DesktopIcon 
+          icon={<img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-5.png" alt="Perfil" width={32} height={32} style={{ imageRendering: 'pixelated' }} />} 
+          label="Mi Perfil" 
+          isSelected={selectedIcon === 'profile'}
+          onClick={() => setSelectedIcon('profile')}
+          onDoubleClick={() => toggleWindow('profile')} 
+        />
+        <DesktopIcon 
+          icon={<img src="https://win98icons.alexmeub.com/icons/png/directory_closed-4.png" alt="Proyectos" width={32} height={32} style={{ imageRendering: 'pixelated' }} />} 
+          label="Proyectos" 
+          isSelected={selectedIcon === 'projects'}
+          onClick={() => setSelectedIcon('projects')}
+          onDoubleClick={() => toggleWindow('projects')} 
+        />
+        <DesktopIcon 
+          icon={<img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" alt="Terminal IA" width={32} height={32} style={{ imageRendering: 'pixelated' }} />} 
+          label="Terminal IA" 
+          isSelected={selectedIcon === 'terminal'}
+          onClick={() => setSelectedIcon('terminal')}
+          onDoubleClick={() => toggleWindow('terminal')} 
+        />
+        <DesktopIcon 
+          icon={<img src="https://win98icons.alexmeub.com/icons/png/message_envelope_open-0.png" alt="Contactar" width={32} height={32} style={{ imageRendering: 'pixelated' }} />} 
+          label="Contactar" 
+          isSelected={selectedIcon === 'contact'}
+          onClick={() => setSelectedIcon('contact')}
+          onDoubleClick={() => toggleWindow('contact')} 
+        />
+      </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {/* Windows */}
+      {openWindows.profile && !minimizedWindows.profile && (
+        <ProfileWindow 
+          onClose={() => closeWindow('profile')} 
+          onMinimize={() => minimizeWindow('profile')}
+          onMaximize={() => toggleMaximize('profile')}
+          isMaximized={maximizedWindows.profile}
+          isActive={activeWindow === 'profile'}
+          onFocus={() => bringToFront('profile')}
+        />
+      )}
+      
+      {openWindows.terminal && !minimizedWindows.terminal && (
+        <TerminalWindow 
+          onClose={() => closeWindow('terminal')} 
+          onMinimize={() => minimizeWindow('terminal')}
+          onMaximize={() => toggleMaximize('terminal')}
+          isMaximized={maximizedWindows.terminal}
+          isActive={activeWindow === 'terminal'}
+          onFocus={() => bringToFront('terminal')}
+        />
+      )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {openWindows.projects && !minimizedWindows.projects && (
+        <ProjectsWindow 
+          onClose={() => closeWindow('projects')} 
+          onMinimize={() => minimizeWindow('projects')}
+          onMaximize={() => toggleMaximize('projects')}
+          isMaximized={maximizedWindows.projects}
+          isActive={activeWindow === 'projects'}
+          onFocus={() => bringToFront('projects')}
+        />
+      )}
+
+      {openWindows.contact && !minimizedWindows.contact && (
+        <ContactCTAWindow 
+          onClose={() => closeWindow('contact')} 
+          onMinimize={() => minimizeWindow('contact')}
+          onMaximize={() => toggleMaximize('contact')}
+          isMaximized={maximizedWindows.contact}
+          isActive={activeWindow === 'contact'}
+          onFocus={() => bringToFront('contact')}
+        />
+      )}
+      </div>
+
+      {/* Taskbar */}
+      <Taskbar 
+        openWindows={openWindows} 
+        minimizedWindows={minimizedWindows}
+        activeWindow={activeWindow} 
+        onWindowClick={toggleWindow} 
+      />
+    </div>
+  );
 }
 
-export default App
+export default App;
