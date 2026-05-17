@@ -19,6 +19,8 @@ const LinkedinIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
+const resumePdf = new URL('../../assets/BryanCruzFullstack.pdf', import.meta.url).href;
+
 interface ProfileWindowProps {
   onClose: () => void;
   onMinimize: () => void;
@@ -153,6 +155,35 @@ export const ProfileWindow: React.FC<ProfileWindowProps> = ({
                     </a>
                     <a href="https://www.linkedin.com/in/bryan-santiago-cruz-angel-5454ab18a/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-blue)', textDecoration: 'none', fontWeight: '500' }}>
                       <LinkedinIcon size={13} /> linkedin.com/in/bryan-santiago-cruz-angel-5454ab18a/
+                    </a>
+                  </div>
+
+                  {/* Download Resume Button */}
+                  <div style={{ marginTop: '14px' }}>
+                    <a 
+                      href={resumePdf} 
+                      download="BryanCruzFullstack.pdf"
+                      className="w95-button"
+                      style={{ 
+                        display: 'inline-flex', 
+                        alignItems: 'center', 
+                        gap: '8px', 
+                        textDecoration: 'none', 
+                        color: '#000', 
+                        fontSize: '12px', 
+                        fontWeight: 'bold',
+                        padding: '6px 12px',
+                        borderLeftColor: '#fff',
+                        borderTopColor: '#fff',
+                        boxShadow: 'inset -1px -1px 0 0 var(--w95-border-dark), inset 1px 1px 0 0 var(--w95-border-light-inner)'
+                      }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#000080' }}>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                      Download Resume (PDF)
                     </a>
                   </div>
                 </div>
