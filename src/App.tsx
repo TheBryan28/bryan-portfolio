@@ -100,29 +100,29 @@ function App() {
         }}>
 
         <DesktopIcon 
-          icon={<img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-5.png" alt="Perfil" width={32} height={32} style={{ imageRendering: 'pixelated' }} />} 
-          label="Mi Perfil" 
+          icon={<img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-5.png" alt="Profile" width={32} height={32} style={{ imageRendering: 'pixelated' }} />} 
+          label="My Profile" 
           isSelected={selectedIcon === 'profile'}
           onClick={() => setSelectedIcon('profile')}
           onDoubleClick={() => toggleWindow('profile')} 
         />
         <DesktopIcon 
-          icon={<img src="https://win98icons.alexmeub.com/icons/png/directory_closed-4.png" alt="Proyectos" width={32} height={32} style={{ imageRendering: 'pixelated' }} />} 
-          label="Proyectos" 
+          icon={<img src="https://win98icons.alexmeub.com/icons/png/directory_closed-4.png" alt="Projects" width={32} height={32} style={{ imageRendering: 'pixelated' }} />} 
+          label="Projects" 
           isSelected={selectedIcon === 'projects'}
           onClick={() => setSelectedIcon('projects')}
           onDoubleClick={() => toggleWindow('projects')} 
         />
         <DesktopIcon 
-          icon={<img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" alt="Terminal IA" width={32} height={32} style={{ imageRendering: 'pixelated' }} />} 
-          label="Terminal IA" 
+          icon={<img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" alt="AI Terminal" width={32} height={32} style={{ imageRendering: 'pixelated' }} />} 
+          label="AI Terminal" 
           isSelected={selectedIcon === 'terminal'}
           onClick={() => setSelectedIcon('terminal')}
           onDoubleClick={() => toggleWindow('terminal')} 
         />
         <DesktopIcon 
-          icon={<img src="https://win98icons.alexmeub.com/icons/png/message_envelope_open-0.png" alt="Contactar" width={32} height={32} style={{ imageRendering: 'pixelated' }} />} 
-          label="Contactar" 
+          icon={<img src="https://win98icons.alexmeub.com/icons/png/message_envelope_open-0.png" alt="Contact" width={32} height={32} style={{ imageRendering: 'pixelated' }} />} 
+          label="Contact" 
           isSelected={selectedIcon === 'contact'}
           onClick={() => setSelectedIcon('contact')}
           onDoubleClick={() => toggleWindow('contact')} 

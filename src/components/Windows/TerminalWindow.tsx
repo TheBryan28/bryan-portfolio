@@ -25,9 +25,9 @@ export const TerminalWindow: React.FC<TerminalWindowProps> = ({
   onFocus 
 }) => {
   const [messages, setMessages] = useState<Message[]>([
-    { text: 'AI_Assistant_OS v1.0.0', isUser: false },
-    { text: 'Conocimiento cargado: Perfil de Bryan Cruz.', isUser: false },
-    { text: 'Escribe una pregunta sobre la experiencia o habilidades de Bryan...', isUser: false }
+    { text: 'AI_Assistant_OS v1.1.0', isUser: false },
+    { text: 'Knowledge Base loaded successfully: Bryan Cruz\'s Profile.', isUser: false },
+    { text: 'Type "help" to see all available commands, or ask a question about his experience, skills, education, AI expertise, or projects.', isUser: false }
   ]);
   const [input, setInput] = useState('');
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
@@ -37,24 +37,30 @@ export const TerminalWindow: React.FC<TerminalWindowProps> = ({
   }, [messages]);
 
   const handleCommand = (cmd: string) => {
-    const lowerCmd = cmd.toLowerCase();
+    const lowerCmd = cmd.toLowerCase().trim();
     let response = '';
 
-    if (lowerCmd.includes('experiencia') || lowerCmd.includes('trabajo')) {
-      response = 'Bryan es un Senior Full Stack Engineer con experiencia arquitectando soluciones EdTech escalables e integrando LLMs avanzados.';
-    } else if (lowerCmd.includes('stack') || lowerCmd.includes('tecnologia') || lowerCmd.includes('habilidades')) {
-      response = 'Experto en frontend (React, Angular, JavaScript) y backend (PHP, Java, Node.js). También trabaja con microservicios (Spring Boot, Eureka).';
-    } else if (lowerCmd.includes('educacion') || lowerCmd.includes('estudios')) {
-      response = 'Actualmente está completando una Maestría (M.Sc.) en Ingeniería de Software.';
-    } else if (lowerCmd.includes('ia') || lowerCmd.includes('ai') || lowerCmd.includes('inteligencia artificial')) {
-      response = 'Es Especialista en IA, trabajando con LLMs avanzados, IA Generativa (RAG) y observabilidad inteligente (AIOps).';
-    } else if (lowerCmd.includes('clear')) {
+    if (lowerCmd === 'help') {
+      response = 'Available commands: [experience] [skills] [education] [ai] [projects] [contact] [clear]\nYou can also ask general questions like "What is his tech stack?" or "Where does he work?".';
+    } else if (lowerCmd.includes('experienc') || lowerCmd.includes('work') || lowerCmd.includes('job') || lowerCmd.includes('company')) {
+      response = 'Bryan is a Senior Full-Stack Engineer currently working at Open LMS (US Remote). Previously, he was an Associate Software Engineer at Learning Technologies Group (LTG) and a WordPress & AI Consultant. He has built enterprise-grade plugins for 8M+ users.';
+    } else if (lowerCmd.includes('stack') || lowerCmd.includes('tecnologi') || lowerCmd.includes('skills') || lowerCmd.includes('tech') || lowerCmd.includes('habilidad')) {
+      response = 'Frontend: ReactJS, Next.js, Angular, Zustand, Tailwind CSS.\nBackend: Node.js, Java (Spring Boot, Spring Cloud), PHP, GraphQL, REST APIs.\nDatabases: MySQL, PostgreSQL, MongoDB, Redis, Pinecone.\nCloud & DevOps: AWS (EC2, S3, RDS), Docker, GitLab CI/CD, Jenkins.';
+    } else if (lowerCmd.includes('educacion') || lowerCmd.includes('education') || lowerCmd.includes('studi') || lowerCmd.includes('degree') || lowerCmd.includes('master')) {
+      response = 'Bryan is currently pursuing a Master of Science (M.Sc.) in Software Engineering at the International University of Rioja (Spain). He also holds a B.S. in Biomedical Engineering and multiple certifications in Generative AI Foundations.';
+    } else if (lowerCmd.includes('ia') || lowerCmd.includes('ai') || lowerCmd.includes('inteligencia artificial') || lowerCmd.includes('llm') || lowerCmd.includes('rag') || lowerCmd.includes('generative')) {
+      response = 'Bryan is an AI/ML Specialist. He has architected "tiny_ai_assistant" for Moodle, developed automated question generator pipelines, built RAG applications with Flowise and LangChain, and implemented YOLO-based real-time Computer Vision models.';
+    } else if (lowerCmd.includes('project') || lowerCmd.includes('repositor') || lowerCmd.includes('code')) {
+      response = 'Recent projects include:\n1. Distributed Microservices Platform (Spring Boot & React)\n2. tiny_ai_assistant (AI content creator for Moodle)\n3. Snap Theme Modernization (LTG)\n4. Deep Learning Activity Monitoring (YOLO publication).';
+    } else if (lowerCmd.includes('contact') || lowerCmd.includes('mail') || lowerCmd.includes('email') || lowerCmd.includes('linkedin') || lowerCmd.includes('phone')) {
+      response = 'You can reach Bryan at:\n- Email: bryan_sca386@outlook.com\n- GitHub: https://github.com/TheBryan28\n- LinkedIn: https://www.linkedin.com/in/bryan-santiago-cruz-angel-5454ab18a/';
+    } else if (lowerCmd === 'clear') {
       setMessages([]);
       return;
-    } else if (lowerCmd.trim() === '') {
+    } else if (lowerCmd === '') {
       return;
     } else {
-      response = 'No tengo información específica sobre eso en este momento. Pregunta sobre su experiencia, stack, educación o conocimientos en IA.';
+      response = 'Command or query not fully understood. Type "help" to see list of standard topics, or ask specifically about his experience, skills, education, or AI projects.';
     }
 
     setMessages(prev => [...prev, { text: cmd, isUser: true }, { text: response, isUser: false }]);
@@ -69,7 +75,7 @@ export const TerminalWindow: React.FC<TerminalWindowProps> = ({
 
   return (
     <Window 
-      title="Terminal de IA - RAG" 
+      title="AI Terminal - RAG Knowledge Engine" 
       icon={<Terminal size={14} />} 
       onClose={onClose} 
       onMinimize={onMinimize}
@@ -77,9 +83,9 @@ export const TerminalWindow: React.FC<TerminalWindowProps> = ({
       isMaximized={isMaximized}
       isActive={isActive} 
       onFocus={onFocus}
-      initialPosition={{ x: 220, y: 120 }}
-      width={500}
-      height={350}
+      initialPosition={{ x: 200, y: 120 }}
+      width={520}
+      height={380}
     >
       <div 
         style={{ 
@@ -97,9 +103,9 @@ export const TerminalWindow: React.FC<TerminalWindowProps> = ({
       >
         <div style={{ flexGrow: 1 }}>
           {messages.map((msg, idx) => (
-            <div key={idx} style={{ marginBottom: '8px', wordBreak: 'break-word' }}>
+            <div key={idx} style={{ marginBottom: '8px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
               {msg.isUser ? (
-                <span style={{ color: '#fff' }}>C:\Users\Invitado&gt; {msg.text}</span>
+                <span style={{ color: '#fff' }}>C:\Users\Guest&gt; {msg.text}</span>
               ) : (
                 <span>{msg.text}</span>
               )}
@@ -108,8 +114,8 @@ export const TerminalWindow: React.FC<TerminalWindowProps> = ({
           <div ref={endOfMessagesRef} />
         </div>
         
-        <div style={{ display: 'flex', marginTop: '10px' }}>
-          <span style={{ color: '#fff', marginRight: '8px' }}>C:\Users\Invitado&gt;</span>
+        <div style={{ display: 'flex', marginTop: '10px', flexShrink: 0 }}>
+          <span style={{ color: '#fff', marginRight: '8px' }}>C:\Users\Guest&gt;</span>
           <input 
             id="terminal-input"
             type="text" 

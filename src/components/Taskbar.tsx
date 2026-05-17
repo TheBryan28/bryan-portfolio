@@ -32,10 +32,10 @@ export const Taskbar: React.FC<TaskbarProps> = ({
 
   const getLabel = (id: string) => {
     switch(id) {
-      case 'profile': return 'Mi Perfil';
-      case 'terminal': return 'Terminal IA';
-      case 'projects': return 'Proyectos';
-      case 'contact': return 'Contacto';
+      case 'profile': return 'My Profile';
+      case 'terminal': return 'AI Terminal';
+      case 'projects': return 'Projects';
+      case 'contact': return 'Contact';
       default: return id;
     }
   };
@@ -71,7 +71,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
         }}
       >
         <img src="https://win98icons.alexmeub.com/icons/png/windows_slanted-1.png" alt="Start" width={20} height={20} style={{ imageRendering: 'pixelated' }} />
-        <span style={{ fontSize: '14px' }}>Inicio</span>
+        <span style={{ fontSize: '14px' }}>Start</span>
       </button>
 
       {/* Vertical Divider */}
