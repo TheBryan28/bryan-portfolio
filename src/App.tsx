@@ -20,6 +20,55 @@ function App() {
   const [maximizedWindows, setMaximizedWindows] = useState<Record<string, boolean>>({});
   const [activeWindow, setActiveWindow] = useState<string>('terminal');
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
+  const [lastOpenState, setLastOpenState] = useState<Record<string, boolean>>({});
+
+  const handleStartClick = () => {
+    // Check if there is at least one open window that is NOT minimized
+    const hasVisibleWindows = Object.entries(openWindows).some(
+      ([id, isOpen]) => isOpen && !minimizedWindows[id]
+    );
+
+    if (hasVisibleWindows) {
+      // Minimize all currently visible windows and save their states
+      const savedStates: Record<string, boolean> = {};
+      const newMinimized = { ...minimizedWindows };
+      
+      Object.entries(openWindows).forEach(([id, isOpen]) => {
+        if (isOpen) {
+          savedStates[id] = !minimizedWindows[id]; // true if it was visible
+          newMinimized[id] = true;
+        }
+      });
+
+      setLastOpenState(savedStates);
+      setMinimizedWindows(newMinimized);
+      setActiveWindow('');
+    } else {
+      // If all are minimized, restore the ones that were visible before minimization
+      const newMinimized = { ...minimizedWindows };
+      let restoredAny = false;
+
+      Object.entries(lastOpenState).forEach(([id, wasVisible]) => {
+        if (wasVisible && openWindows[id]) {
+          newMinimized[id] = false;
+          restoredAny = true;
+          setActiveWindow(id);
+        }
+      });
+
+      // If we didn't restore anything (e.g. last state was empty), restore all open windows
+      if (!restoredAny) {
+        Object.entries(openWindows).forEach(([id, isOpen]) => {
+          if (isOpen) {
+            newMinimized[id] = false;
+            setActiveWindow(id);
+          }
+        });
+      }
+
+      setMinimizedWindows(newMinimized);
+    }
+  };
 
   const toggleWindow = (id: string) => {
     if (!openWindows[id]) {
@@ -181,6 +230,7 @@ function App() {
         minimizedWindows={minimizedWindows}
         activeWindow={activeWindow} 
         onWindowClick={toggleWindow} 
+        onStartClick={handleStartClick}
       />
     </div>
   );

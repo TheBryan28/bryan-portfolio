@@ -31,10 +31,17 @@ export const Window: React.FC<WindowProps> = ({
   width = 450,
   height = 'auto'
 }) => {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-  const responsiveWidth = isMobile || isMaximized ? '100%' : width;
+  const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth <= 768);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const responsiveWidth = isMobile ? 'calc(100% - 16px)' : (isMaximized ? '100%' : width);
   const responsiveHeight = isMaximized ? '100%' : height;
-  const responsivePosition = (isMobile || isMaximized) ? { x: 0, y: 0 } : initialPosition;
+  const responsivePosition = isMobile ? { x: 8, y: 45 } : (isMaximized ? { x: 0, y: 0 } : initialPosition);
 
   return (
     <motion.div
@@ -61,7 +68,9 @@ export const Window: React.FC<WindowProps> = ({
           ? '10px 10px 30px rgba(0,0,0,0.4)' 
           : '5px 5px 15px rgba(0,0,0,0.2)',
         ...(!isActive ? { opacity: 0.98 } : {}),
-        ...(isMaximized ? { top: 0, left: 0, right: 0, bottom: 0, maxHeight: '100%' } : { maxHeight: 'calc(100% - 60px)' })
+        ...(isMobile 
+          ? { maxHeight: 'calc(100% - 95px)' } 
+          : (isMaximized ? { top: 0, left: 0, right: 0, bottom: 0, maxHeight: '100%' } : { maxHeight: 'calc(100% - 60px)' }))
       }}
       className="w95-border"
     >

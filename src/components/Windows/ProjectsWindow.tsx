@@ -19,6 +19,14 @@ export const ProjectsWindow: React.FC<ProjectsWindowProps> = ({
   isActive, 
   onFocus 
 }) => {
+  const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth <= 768);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const projects = [
     {
       title: 'Distributed Microservices Platform for Online Library',
@@ -94,13 +102,13 @@ export const ProjectsWindow: React.FC<ProjectsWindowProps> = ({
           {projects.map((proj, idx) => (
             <div key={idx} className="w95-border" style={{ 
               display: 'flex', 
-              gap: '15px', 
+              gap: isMobile ? '10px' : '15px', 
               padding: '12px', 
               backgroundColor: '#fafafa',
               transition: 'transform 0.1s ease',
               cursor: 'default',
-              flexDirection: 'row',
-              alignItems: 'flex-start'
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: isMobile ? 'center' : 'flex-start'
             }}>
               <div className="w95-border-sunken" style={{ 
                 width: '48px', 
@@ -113,21 +121,28 @@ export const ProjectsWindow: React.FC<ProjectsWindowProps> = ({
               }}>
                 {proj.icon}
               </div>
-              <div style={{ flexGrow: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', marginBottom: '4px' }}>
+              <div style={{ flexGrow: 1, width: '100%', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: isMobile ? 'column' : 'row',
+                  justifyContent: 'space-between', 
+                  alignItems: isMobile ? 'flex-start' : 'center', 
+                  gap: isMobile ? '4px' : '0px',
+                  marginBottom: '6px' 
+                }}>
                   <h4 style={{ margin: '0', color: 'var(--w95-title-bg)', fontSize: '15px', fontWeight: 'bold' }}>
                     {proj.title}
                   </h4>
-                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#666' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#666', flexShrink: 0 }}>
                     {proj.year}
                   </span>
                 </div>
-                <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#333', lineHeight: '1.4', textAlign: 'justify' }}>
+                <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#333', lineHeight: '1.4', textAlign: 'justify' }}>
                   {proj.description}
                 </p>
                 
                 {/* Tech tags */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: proj.links.length > 0 ? '8px' : '0' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: proj.links.length > 0 ? '10px' : '0' }}>
                   {proj.stack.split(', ').map(tech => (
                     <span key={tech} style={{ 
                       fontSize: '10px', 
@@ -145,7 +160,7 @@ export const ProjectsWindow: React.FC<ProjectsWindowProps> = ({
 
                 {/* Repo links */}
                 {proj.links.length > 0 && (
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
                     {proj.links.map((link, lIdx) => (
                       <a 
                         key={lIdx} 
@@ -160,7 +175,7 @@ export const ProjectsWindow: React.FC<ProjectsWindowProps> = ({
                           gap: '4px', 
                           textDecoration: 'none', 
                           color: '#000',
-                          padding: '2px 6px',
+                          padding: '4px 8px',
                           fontWeight: 'bold'
                         }}
                       >

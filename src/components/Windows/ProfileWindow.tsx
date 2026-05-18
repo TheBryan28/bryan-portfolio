@@ -41,6 +41,13 @@ export const ProfileWindow: React.FC<ProfileWindowProps> = ({
   onFocus 
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('general');
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth <= 768);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
     { id: 'general', label: 'General', icon: <User size={12} /> },
@@ -69,9 +76,10 @@ export const ProfileWindow: React.FC<ProfileWindowProps> = ({
           display: 'flex', 
           borderBottom: '2px solid var(--w95-border-dark)', 
           marginBottom: '10px',
-          paddingLeft: '5px',
-          gap: '2px',
-          flexShrink: 0
+          paddingLeft: isMobile ? '0px' : '5px',
+          gap: isMobile ? '1px' : '2px',
+          flexShrink: 0,
+          width: '100%'
         }}>
           {tabs.map((tab) => {
             const isCurrent = activeTab === tab.id;
@@ -80,10 +88,10 @@ export const ProfileWindow: React.FC<ProfileWindowProps> = ({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 style={{
-                  padding: '6px 12px',
+                  padding: isMobile ? '6px 4px' : '6px 12px',
                   cursor: 'pointer',
                   fontFamily: 'inherit',
-                  fontSize: '12px',
+                  fontSize: isMobile ? '10.5px' : '12px',
                   fontWeight: isCurrent ? 'bold' : 'normal',
                   borderTop: '2px solid var(--w95-border-light)',
                   borderLeft: '2px solid var(--w95-border-light)',
@@ -95,15 +103,18 @@ export const ProfileWindow: React.FC<ProfileWindowProps> = ({
                   zIndex: isCurrent ? 2 : 1,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  justifyContent: 'center',
+                  gap: isMobile ? '3px' : '6px',
                   borderTopLeftRadius: '3px',
                   borderTopRightRadius: '3px',
                   color: isCurrent ? '#000' : '#555',
-                  boxShadow: isCurrent ? 'none' : 'inset -1px -1px 0 0 #b0b0b0'
+                  boxShadow: isCurrent ? 'none' : 'inset -1px -1px 0 0 #b0b0b0',
+                  flexGrow: 1,
+                  minWidth: 0
                 }}
               >
                 {tab.icon}
-                <span>{tab.label}</span>
+                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tab.label}</span>
               </button>
             );
           })}
@@ -115,10 +126,16 @@ export const ProfileWindow: React.FC<ProfileWindowProps> = ({
           {/* GENERAL TAB */}
           {activeTab === 'general' && (
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '15px' }}>
-              <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', flexShrink: 0 }}>
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? '12px' : '20px', 
+                alignItems: isMobile ? 'center' : 'flex-start', 
+                flexShrink: 0 
+              }}>
                 <div className="w95-border-sunken" style={{ 
-                  width: '120px', 
-                  height: '140px', 
+                  width: isMobile ? '100px' : '120px', 
+                  height: isMobile ? '115px' : '140px', 
                   backgroundColor: '#f0f0f0', 
                   display: 'flex',
                   alignItems: 'center',
@@ -137,16 +154,29 @@ export const ProfileWindow: React.FC<ProfileWindowProps> = ({
                     }} 
                   />
                 </div>
-                <div style={{ flexGrow: 1 }}>
-                  <h2 style={{ margin: '0 0 4px 0', fontSize: '24px', color: 'var(--w95-title-bg)', borderBottom: '2px solid var(--accent-blue)', paddingBottom: '4px', fontWeight: 'bold' }}>
+                <div style={{ flexGrow: 1, width: '100%', textAlign: isMobile ? 'center' : 'left' }}>
+                  <h2 style={{ 
+                    margin: '0 0 4px 0', 
+                    fontSize: isMobile ? '20px' : '24px', 
+                    color: 'var(--w95-title-bg)', 
+                    borderBottom: '2px solid var(--accent-blue)', 
+                    paddingBottom: '4px', 
+                    fontWeight: 'bold' 
+                  }}>
                     Bryan Cruz
                   </h2>
-                  <p style={{ margin: '0 0 10px 0', fontWeight: 'bold', fontSize: '15px', color: '#444' }}>
+                  <p style={{ margin: '0 0 10px 0', fontWeight: 'bold', fontSize: isMobile ? '13px' : '15px', color: '#444' }}>
                     Senior Full Stack Engineer & <span style={{ color: 'var(--accent-pink)' }}>AI Specialist</span>
                   </p>
                   
                   {/* Quick Contact Links */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '6px', 
+                    fontSize: '12px',
+                    alignItems: isMobile ? 'center' : 'flex-start'
+                  }}>
                     <a href="mailto:bryan_sca386@outlook.com" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-blue)', textDecoration: 'none', fontWeight: '500' }}>
                       <Mail size={13} /> bryan_sca386@outlook.com
                     </a>
@@ -417,12 +447,30 @@ export const ProfileWindow: React.FC<ProfileWindowProps> = ({
                   type: 'Degree'
                 }
               ].map((item, index) => (
-                <div key={index} style={{ borderBottom: '1px solid #ccc', paddingBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div 
+                  key={index} 
+                  style={{ 
+                    borderBottom: '1px solid #ccc', 
+                    paddingBottom: '8px', 
+                    display: 'flex', 
+                    flexDirection: isMobile ? 'column' : 'row', 
+                    justifyContent: 'space-between', 
+                    alignItems: isMobile ? 'flex-start' : 'center',
+                    gap: isMobile ? '6px' : '0px'
+                  }}
+                >
                   <div>
                     <strong style={{ fontSize: '13px', color: '#000' }}>{item.title}</strong>
                     <div style={{ color: '#555', fontSize: '12px' }}>{item.institution}</div>
                   </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ 
+                    textAlign: isMobile ? 'left' : 'right', 
+                    flexShrink: 0,
+                    width: isMobile ? '100%' : 'auto',
+                    display: isMobile ? 'flex' : 'block',
+                    justifyContent: isMobile ? 'space-between' : 'initial',
+                    alignItems: 'center'
+                  }}>
                     <span style={{ 
                       fontSize: '10px', 
                       backgroundColor: 'rgba(58, 134, 255, 0.1)', 
@@ -432,11 +480,16 @@ export const ProfileWindow: React.FC<ProfileWindowProps> = ({
                       fontWeight: 'bold',
                       border: '1px solid rgba(58, 134, 255, 0.2)',
                       display: 'inline-block',
-                      marginBottom: '4px'
+                      marginBottom: isMobile ? '0px' : '4px'
                     }}>
                       {item.type}
                     </span>
-                    <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#666' }}>{item.year}</div>
+                    <div style={{ 
+                      fontSize: '11px', 
+                      fontWeight: 'bold', 
+                      color: '#666',
+                      marginLeft: isMobile ? '8px' : '0px'
+                    }}>{item.year}</div>
                   </div>
                 </div>
               ))}
