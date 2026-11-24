@@ -7,6 +7,7 @@ export function AskPanel() {
   const ai = useAssistant();
   const { t } = useLang();
   const [input, setInput] = useState('');
+  const [confirmDownload, setConfirmDownload] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
   const busy = ai.status === 'thinking' || ai.status === 'streaming';
   const onDevice = (ai.engine ?? ai.activeEngine) === 'on-device';
@@ -47,7 +48,8 @@ export function AskPanel() {
                 disabled={busy || ai.device === 'downloading'}
                 title={ai.device === 'downloadable' ? t.ask.runLocal : undefined}
                 onClick={() => {
-                  if (ai.device === 'downloadable') ai.enableOnDevice();
+                  // A 4 GB download never starts without an explicit yes.
+                  if (ai.device === 'downloadable') setConfirmDownload(true);
                   else if (!ai.preferDevice) ai.setPreferDevice(true);
                 }}
               >
@@ -72,6 +74,29 @@ export function AskPanel() {
             </button>
           )}
         </div>
+
+        {confirmDownload && ai.device === 'downloadable' && (
+          <div className="ask-confirm" role="alertdialog" aria-labelledby="nano-confirm-title">
+            <p>
+              <strong id="nano-confirm-title">{t.ask.confirmTitle}</strong> {t.ask.confirmText}
+            </p>
+            <div className="ask-confirm-actions">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => {
+                  setConfirmDownload(false);
+                  ai.enableOnDevice();
+                }}
+              >
+                {t.ask.confirmYes}
+              </button>
+              <button type="button" className="btn ghost" onClick={() => setConfirmDownload(false)}>
+                {t.ask.confirmNo}
+              </button>
+            </div>
+          </div>
+        )}
 
         {ai.device === 'downloading' && <p className="ask-info">{t.ask.downloadingBg}</p>}
 
