@@ -1,119 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-
-:root {
-  --w95-bg: #008080;
-  --w95-window-bg: #ececec;
-  --w95-title-bg: linear-gradient(90deg, #000080 0%, #1084d0 100%);
-  --w95-title-text: #ffffff;
-  --w95-border-light: #ffffff;
-  --w95-border-dark: #808080;
-  --w95-border-darker: #000000;
-  --w95-border-light-inner: #dfdfdf;
-  --accent-blue: #3a86ff;
-  --accent-pink: #ff006e;
-  --accent-purple: #8338ec;
+/* Global reset shared by both views. View styles live in modern/ and retro/. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-* {
-  box-sizing: border-box;
+html,
+body {
   margin: 0;
   padding: 0;
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--w95-bg);
-  color: #333;
-  overflow: hidden;
-  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-.desktop-icon {
-  border: 1px solid transparent;
-}
-
-.desktop-icon:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.desktop-icon.selected {
-  background-color: rgba(0, 0, 128, 0.4);
-  border: 1px dotted rgba(255, 255, 255, 0.5);
-}
-
-.desktop-icon.selected .icon-wrapper {
-  filter: drop-shadow(0 0 8px var(--accent-blue));
-}
-
-.desktop-icon.selected .icon-label {
-  background-color: #000080;
-  border: 1px dotted #fff;
-}
-
-/* W95 Button and Window Border Mixin equivalent */
-.w95-border {
-  border-top: 2px solid var(--w95-border-light);
-  border-left: 2px solid var(--w95-border-light);
-  border-bottom: 2px solid var(--w95-border-darker);
-  border-right: 2px solid var(--w95-border-darker);
-  box-shadow: inset -1px -1px 0 0 var(--w95-border-dark), inset 1px 1px 0 0 var(--w95-border-light-inner);
-}
-
-.w95-border-sunken {
-  border-top: 2px solid var(--w95-border-dark);
-  border-left: 2px solid var(--w95-border-dark);
-  border-bottom: 2px solid var(--w95-border-light);
-  border-right: 2px solid var(--w95-border-light);
-  box-shadow: inset -1px -1px 0 0 var(--w95-border-light-inner), inset 1px 1px 0 0 var(--w95-border-darker);
-}
-
-.w95-button {
-  background-color: var(--w95-window-bg);
-  border-top: 2px solid var(--w95-border-light);
-  border-left: 2px solid var(--w95-border-light);
-  border-bottom: 2px solid var(--w95-border-darker);
-  border-right: 2px solid var(--w95-border-darker);
-  box-shadow: inset -1px -1px 0 0 var(--w95-border-dark), inset 1px 1px 0 0 var(--w95-border-light-inner);
-  padding: 4px 8px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 14px;
-}
-
-.w95-button:active {
-  border-top: 2px solid var(--w95-border-darker);
-  border-left: 2px solid var(--w95-border-darker);
-  border-bottom: 2px solid var(--w95-border-light);
-  border-right: 2px solid var(--w95-border-light);
-  box-shadow: inset -1px -1px 0 0 var(--w95-border-light-inner), inset 1px 1px 0 0 var(--w95-border-dark);
-  padding: 5px 7px 3px 9px; /* Shift content slightly when pressed */
-}
-
-/* Scrollbar styling for a vintage look */
-::-webkit-scrollbar {
-  width: 16px;
-  height: 16px;
-  background: var(--w95-window-bg);
-  border-left: 1px solid var(--w95-border-light);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--w95-window-bg);
-  border-top: 2px solid var(--w95-border-light);
-  border-left: 2px solid var(--w95-border-light);
-  border-bottom: 2px solid var(--w95-border-darker);
-  border-right: 2px solid var(--w95-border-darker);
-  box-shadow: inset -1px -1px 0 0 var(--w95-border-dark), inset 1px 1px 0 0 var(--w95-border-light-inner);
-}
-
-::-webkit-scrollbar-button:single-button {
-  background: var(--w95-window-bg);
+img {
+  max-width: 100%;
   display: block;
-  border-top: 2px solid var(--w95-border-light);
-  border-left: 2px solid var(--w95-border-light);
-  border-bottom: 2px solid var(--w95-border-darker);
-  border-right: 2px solid var(--w95-border-darker);
-  box-shadow: inset -1px -1px 0 0 var(--w95-border-dark), inset 1px 1px 0 0 var(--w95-border-light-inner);
-  height: 16px;
-  width: 16px;
+}
+
+#root {
+  min-height: 100dvh;
 }
