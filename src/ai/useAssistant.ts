@@ -7,7 +7,7 @@ export type AssistantStatus = 'idle' | 'thinking' | 'streaming' | 'error';
 export interface AssistantState {
   messages: ChatTurn[];
   status: AssistantStatus;
-  error: string | null;
+  error: AssistantError['kind'] | null;
   engine: Engine | null;
   /** What Chrome reports for Gemini Nano on this machine. */
   device: LanguageModelAvailability | 'checking';
@@ -23,7 +23,7 @@ const MAX_QUESTION = 500;
 export function useAssistant(): AssistantState {
   const [messages, setMessages] = useState<ChatTurn[]>([]);
   const [status, setStatus] = useState<AssistantStatus>('idle');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<AssistantError['kind'] | null>(null);
   const [engine, setEngine] = useState<Engine | null>(null);
   const [device, setDevice] = useState<AssistantState['device']>('checking');
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
@@ -69,9 +69,8 @@ export function useAssistant(): AssistantState {
             setStatus('idle');
             return;
           }
-          const message = err instanceof AssistantError ? err.message : 'The assistant could not answer right now.';
           setMessages((prev) => (prev[prev.length - 1]?.content ? prev : prev.slice(0, -1)));
-          setError(message);
+          setError(err instanceof AssistantError ? err.kind : 'failed');
           setStatus('error');
         }
       })();

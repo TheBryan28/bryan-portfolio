@@ -1,18 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUp, Square, RotateCcw } from 'lucide-react';
 import { useAssistant } from '../ai/useAssistant';
-import { SUGGESTED_QUESTIONS } from '../ai/knowledge';
-
-function EngineLabel({ engine, device }: { engine: string | null; device: string }) {
-  if (engine === 'on-device' || (!engine && device === 'available')) return <>On-device · Gemini Nano</>;
-  return <>Cloud · Gemini</>;
-}
+import { useLang } from '../i18n/LanguageContext';
 
 export function AskPanel() {
   const ai = useAssistant();
+  const { t } = useLang();
   const [input, setInput] = useState('');
   const logRef = useRef<HTMLDivElement>(null);
   const busy = ai.status === 'thinking' || ai.status === 'streaming';
+  const onDevice = ai.engine === 'on-device' || (!ai.engine && ai.device === 'available');
 
   useEffect(() => {
     const log = logRef.current;
@@ -31,18 +28,22 @@ export function AskPanel() {
         <div className="ask-bar">
           <span className="engine-pill">
             <span className="dot" />
-            <EngineLabel engine={ai.engine} device={ai.device} />
+            {onDevice ? t.ask.onDevice : t.ask.cloud}
           </span>
           {ai.device === 'downloadable' && (
             <button type="button" className="link-btn" onClick={ai.enableOnDevice}>
-              Run it on your device instead
+              {t.ask.runLocal}
             </button>
           )}
-          {ai.downloadProgress !== null && <span className="mono">Downloading Gemini Nano {Math.round(ai.downloadProgress * 100)}%</span>}
+          {ai.downloadProgress !== null && (
+            <span className="mono">
+              {t.ask.downloading} {Math.round(ai.downloadProgress * 100)}%
+            </span>
+          )}
           <span className="spacer" />
           {ai.messages.length > 0 && (
             <button type="button" className="link-btn" onClick={ai.reset}>
-              <RotateCcw size={12} aria-hidden="true" /> New chat
+              <RotateCcw size={12} aria-hidden="true" /> {t.ask.newChat}
             </button>
           )}
         </div>
@@ -50,9 +51,9 @@ export function AskPanel() {
         <div className="ask-log" ref={logRef} aria-live="polite">
           {ai.messages.length === 0 ? (
             <div className="ask-empty">
-              Ask about Bryan’s projects, stack or experience, in English or Spanish.
+              {t.ask.empty}
               <div className="chips">
-                {SUGGESTED_QUESTIONS.map((q) => (
+                {t.ask.suggestions.map((q) => (
                   <button key={q} type="button" className="chip" onClick={() => submit(q)}>
                     {q}
                   </button>
@@ -73,7 +74,7 @@ export function AskPanel() {
 
         {ai.error && (
           <p className="ask-error" role="alert">
-            {ai.error} You can still read everything below or email Bryan.
+            {t.ask.errors[ai.error]} {t.ask.errorTail}
           </p>
         )}
 
@@ -85,31 +86,28 @@ export function AskPanel() {
           }}
         >
           <label htmlFor="ask-input" className="visually-hidden">
-            Your question
+            {t.ask.label}
           </label>
           <input
             id="ask-input"
             value={input}
             maxLength={500}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="What has Bryan built with RAG?"
+            placeholder={t.ask.placeholder}
             autoComplete="off"
           />
           {busy ? (
-            <button type="button" className="btn" onClick={ai.stop} aria-label="Stop the answer">
+            <button type="button" className="btn" onClick={ai.stop} aria-label={t.ask.stop}>
               <Square size={14} aria-hidden="true" />
             </button>
           ) : (
-            <button type="submit" className="btn" aria-label="Send question" disabled={!input.trim()}>
+            <button type="submit" className="btn" aria-label={t.ask.send} disabled={!input.trim()}>
               <ArrowUp size={16} aria-hidden="true" />
             </button>
           )}
         </form>
       </div>
-      <p className="ask-note">
-        On Chrome desktops with Gemini Nano, answers are generated on your device and nothing leaves it. Otherwise your question
-        goes to Google’s Gemini API, which may use it to improve its services, so please don’t include personal information.
-      </p>
+      <p className="ask-note">{t.ask.note}</p>
     </div>
   );
 }

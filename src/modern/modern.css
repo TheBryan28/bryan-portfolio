@@ -262,6 +262,20 @@
   cursor: pointer;
 }
 
+.lang-toggle {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+  font: 600 0.78rem var(--font-mono);
+}
+
 .theme-toggle {
   width: 36px;
   height: 36px;
@@ -287,6 +301,7 @@
   }
 }
 
+.lang-toggle:hover,
 .theme-toggle:hover,
 .retro-toggle:hover {
   border-color: var(--ink);
@@ -296,7 +311,7 @@
   .site-nav {
     display: none;
   }
-  .theme-toggle {
+  .lang-toggle {
     margin-left: auto;
   }
 }
@@ -560,6 +575,7 @@
 }
 
 .work,
+.services,
 .ask-section,
 .experience,
 .projects-section,
@@ -1042,6 +1058,183 @@
 
 .term-line:first-child {
   color: #9db0ff;
+}
+
+/* ---------- Services ---------- */
+.services-head {
+  max-width: 820px;
+  margin-bottom: 36px;
+}
+
+.services-head h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 1.2rem + 3vw, 3.6rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-weight: 650;
+  margin: 12px 0 16px;
+  text-wrap: balance;
+}
+
+.services-head p:last-child {
+  color: var(--muted);
+  font-size: 1.05rem;
+  margin: 0;
+  max-width: 44em;
+}
+
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.service {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 20px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.service:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+}
+
+.service-index {
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+.service h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+.service p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.service .tags {
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.process {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 24px 40px;
+  align-items: center;
+  padding: 28px;
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.process h3 {
+  grid-column: 1 / -1;
+  margin: 0;
+  font: 500 0.75rem var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+
+.process ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.process li {
+  display: flex;
+  gap: 12px;
+}
+
+.step {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.process li strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+}
+
+.process li p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+.process-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.process .btn {
+  background: var(--bg);
+  color: var(--ink);
+  border-color: var(--bg);
+}
+
+.process .btn.ghost {
+  background: transparent;
+  color: var(--bg);
+  border-color: color-mix(in srgb, var(--bg) 35%, transparent);
+}
+
+.process-note {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+
+@media (max-width: 1060px) {
+  .service-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .process {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .service-grid,
+  .process ol {
+    grid-template-columns: 1fr;
+  }
+  .process {
+    padding: 22px;
+  }
 }
 
 /* ---------- Ask ---------- */
@@ -1669,10 +1862,33 @@
 @media (prefers-reduced-motion: reduce) {
   .btn,
   .work-tile,
+  .service,
   .role-chev {
     transition: none;
   }
   .bubble.pending::after {
     animation: none;
   }
+}
+
+.flag {
+  display: block;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--ink);
 }

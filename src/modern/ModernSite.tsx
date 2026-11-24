@@ -3,9 +3,10 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { useGSAP } from '@gsap/react';
-import { ArrowDownToLine, ArrowUpRight, Check, ChevronDown, Copy, MessageSquareText, Monitor, Moon, Sun } from 'lucide-react';
+import { ArrowDownToLine, ArrowRight, ArrowUpRight, Check, ChevronDown, Copy, MessageSquareText, Monitor, Moon, Sun } from 'lucide-react';
+import { Flag } from '../ui/Flag';
 import { useTheme } from '../hooks/useTheme';
-import { profile } from '../data/profile';
+import { useLang } from '../i18n/LanguageContext';
 import { AskPanel } from './AskPanel';
 import { GoogleCloudIcon } from '../ui/GoogleCloudIcon';
 import { setupCursorCrew } from './build';
@@ -16,62 +17,20 @@ import './modern.css';
 
 gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin, useGSAP);
 
-const FOCUS_WORDS = ['generative AI features', 'RAG pipelines', 'cloud infrastructure', 'AI developer tools'];
-
 const WORK = [
-  {
-    id: 'nova',
-    size: 'wide',
-    title: 'Nova Course Generator',
-    stat: '649 sites',
-    line: 'A topic or a set of files becomes a complete Moodle course in about five minutes. The instructor approves the outline first.',
-    Visual: NovaVisual,
-  },
-  {
-    id: 'editor',
-    size: '',
-    title: 'tiny_ai_assistant',
-    stat: '666 sites',
-    line: 'The AI content creator inside the course editor.',
-    Visual: EditorVisual,
-  },
-  {
-    id: 'hub',
-    size: '',
-    title: 'One AI layer, four providers',
-    stat: '1 interface',
-    line: 'Every AI plugin talks to OpenAI, Anthropic, Gemini or DeepSeek through one interface.',
-    Visual: HubVisual,
-  },
-  {
-    id: 'chart',
-    size: '',
-    title: 'Snap theme refactor',
-    stat: '11 → 3',
-    line: 'High-priority customer issues in the year after the refactor began.',
-    Visual: ChartVisual,
-  },
-  {
-    id: 'pipe',
-    size: '',
-    title: 'CI/CD back to green',
-    stat: '300+ tests',
-    line: 'Repaired Behat and PHPUnit suites, then added AI review that separates UI changes from regressions.',
-    Visual: PipelineVisual,
-  },
-  {
-    id: 'term',
-    size: 'wide',
-    title: 'The team’s Claude Code plugin',
-    stat: '12 skills',
-    line: 'From a Jira ticket to a merged Moodle release, with an approval gate before any code changes.',
-    Visual: TerminalVisual,
-  },
-];
+  { id: 'nova', size: 'wide', Visual: NovaVisual },
+  { id: 'editor', size: '', Visual: EditorVisual },
+  { id: 'hub', size: '', Visual: HubVisual },
+  { id: 'chart', size: '', Visual: ChartVisual },
+  { id: 'pipe', size: '', Visual: PipelineVisual },
+  { id: 'term', size: 'wide', Visual: TerminalVisual },
+] as const;
 
-const PROJECT_ART = { 'VerifAI Wallet': 'wallet', 'Relatos de Papel': 'services', 'Banking Assistant Workflows': 'flow' } as const;
+// Side projects shown in the modern view, by position in profile.projects.
+const PROJECT_ART: Record<number, 'wallet' | 'services' | 'flow'> = { 0: 'wallet', 2: 'services', 3: 'flow' };
 
 function CopyEmail({ className = 'btn ghost' }: { className?: string }) {
+  const { t, profile } = useLang();
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -85,8 +44,34 @@ function CopyEmail({ className = 'btn ghost' }: { className?: string }) {
   return (
     <button type="button" className={className} onClick={copy}>
       {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
-      {copied ? 'Copied' : 'Copy email'}
+      {copied ? t.hero.copied : t.hero.copy}
     </button>
+  );
+}
+
+// The rotating word under the tagline. Remounted per language so GSAP and
+// React never fight over the same text node.
+function FocusWord({ words }: { words: string[] }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        const cycle = gsap.timeline({ repeat: -1, delay: 2.4 });
+        words
+          .slice(1)
+          .concat(words[0])
+          .forEach((w) => {
+            cycle.to(ref.current, { duration: 0.9, scrambleText: { text: w, chars: 'lowerCase', speed: 0.6 } }).to({}, { duration: 2.2 });
+          });
+      });
+    },
+    { scope: ref },
+  );
+  return (
+    <span ref={ref} className="focus-word">
+      {words[0]}
+    </span>
   );
 }
 
@@ -94,6 +79,7 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
   const root = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const { theme, toggle } = useTheme();
+  const { lang, toggleLang, t, profile } = useLang();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -109,17 +95,6 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
         const cleanupCrew = setupCursorCrew(root.current!, (el) => {
           if (el.matches('.work-tile')) playVisual(el);
         });
-
-        // The focus line cycles through what Bryan builds.
-        const word = root.current!.querySelector('.focus-word');
-        if (word) {
-          const cycle = gsap.timeline({ repeat: -1, delay: 2.4 });
-          FOCUS_WORDS.slice(1)
-            .concat(FOCUS_WORDS[0])
-            .forEach((w) => {
-              cycle.to(word, { duration: 0.9, scrambleText: { text: w, chars: 'lowerCase', speed: 0.6 } }).to({}, { duration: 2.2 });
-            });
-        }
 
         // Stack marquee drifts with the scroll direction.
         gsap.utils.toArray<HTMLElement>('.marquee-track').forEach((track, i) => {
@@ -150,7 +125,13 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
     { scope: root },
   );
 
+  // Copy changes length between languages; re-measure scroll positions.
+  useEffect(() => {
+    ScrollTrigger.refresh();
+  }, [lang]);
+
   const year = new Date().getFullYear();
+  const mailto = `mailto:${profile.email}?subject=${encodeURIComponent(t.services.ctaSubject)}`;
 
   return (
     <div className="modern" ref={root}>
@@ -162,24 +143,29 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
             </span>
             {profile.name}
           </a>
-          <nav className="site-nav" aria-label="Sections">
-            <a href="#work">Work</a>
-            <a href="#ask">Ask AI</a>
-            <a href="#experience">Experience</a>
-            <a href="#contact">Contact</a>
+          <nav className="site-nav" aria-label={lang === 'es' ? 'Secciones' : 'Sections'}>
+            <a href="#work">{t.nav.work}</a>
+            <a href="#services">{t.nav.services}</a>
+            <a href="#ask">{t.nav.ask}</a>
+            <a href="#experience">{t.nav.experience}</a>
+            <a href="#contact">{t.nav.contact}</a>
           </nav>
+          <button type="button" className="lang-toggle" onClick={toggleLang} aria-label={t.switchTo} title={t.switchTo}>
+            <Flag country={lang === 'en' ? 'co' : 'us'} />
+            <span>{lang === 'en' ? 'ES' : 'EN'}</span>
+          </button>
           <button
             type="button"
             className="theme-toggle"
             onClick={toggle}
-            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-            title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
+            aria-label={theme === 'dark' ? t.themeToLight : t.themeToDark}
+            title={theme === 'dark' ? t.themeToLight : t.themeToDark}
           >
             {theme === 'dark' ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
           </button>
           <button type="button" className="retro-toggle" onClick={onRetro}>
-            <Monitor size={15} aria-hidden="true" /> <span className="retro-label">Retro desktop</span>
-            <span className="retro-short">Retro</span>
+            <Monitor size={15} aria-hidden="true" /> <span className="retro-label">{t.retro}</span>
+            <span className="retro-short">{t.retroShort}</span>
           </button>
         </div>
       </header>
@@ -188,7 +174,7 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
         <section className="hero" data-build-section>
           <div className="wrap hero-grid">
             <figure className="portrait" data-build="portrait.webp">
-              <img src={portrait} alt="Portrait of Bryan Cruz" width={600} height={703} />
+              <img src={portrait} alt={lang === 'es' ? 'Retrato de Bryan Cruz' : 'Portrait of Bryan Cruz'} width={600} height={703} />
               <figcaption className="mono">600 × 703 · Ibagué, CO</figcaption>
               <span className="handle tl" aria-hidden="true" />
               <span className="handle tr" aria-hidden="true" />
@@ -207,17 +193,17 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
               </h1>
               <p className="tagline" data-build="Tagline">
                 <span className="visually-hidden">
-                  Full-stack AI engineer building generative AI features, RAG pipelines, cloud infrastructure and AI developer tools.
+                  {t.hero.building} {t.hero.focus.join(', ')}.
                 </span>
                 <span aria-hidden="true">
-                  Full-stack AI engineer building
-                  <span className="focus-word">{FOCUS_WORDS[0]}</span>
+                  {t.hero.building}
+                  <FocusWord key={lang} words={t.hero.focus} />
                 </span>
               </p>
               <div className="hero-meta" data-build="Credentials">
                 <p>
-                  I lead the generative AI plugins at <strong>Open LMS</strong>, a learning platform with 10 million users. Based in{' '}
-                  {profile.location}.
+                  {t.hero.leadA} <strong>Open LMS</strong>
+                  {t.hero.leadB} {profile.location}.
                 </p>
                 <ul className="badges">
                   {profile.certifications.slice(0, 2).map((c) => (
@@ -227,59 +213,107 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
                       </span>
                       <span>
                         {c.name}
-                        <small>Google Cloud Certified</small>
+                        <small>{t.hero.certified}</small>
                       </span>
                     </li>
                   ))}
                 </ul>
               </div>
               <div className="actions" data-build="Actions">
-                <a className="btn" href={profile.resumeUrl} target="_blank" rel="noopener">
-                  <ArrowDownToLine size={16} aria-hidden="true" /> Resume
+                <a className="btn" href="#services">
+                  {t.hero.hire} <ArrowRight size={16} aria-hidden="true" />
                 </a>
-                <a className="btn ghost" href="#ask">
-                  <MessageSquareText size={16} aria-hidden="true" /> Ask my AI
+                <a className="btn ghost" href={profile.resumeUrl} target="_blank" rel="noopener">
+                  <ArrowDownToLine size={16} aria-hidden="true" /> {t.hero.resume}
                 </a>
                 <CopyEmail />
               </div>
             </div>
-
           </div>
         </section>
 
         <section className="work" id="work" data-build-section>
           <div className="wrap">
             <div className="section-head" data-build="Section">
-              <p className="eyebrow">Selected work · Open LMS</p>
-              <h2>Generative AI in production, on more than 600 sites.</h2>
+              <p className="eyebrow">{t.work.eyebrow}</p>
+              <h2>{t.work.title}</h2>
             </div>
             <div className="bento">
-              {WORK.map(({ id, size, title, stat, line, Visual }) => (
-                <article key={id} className={`work-tile ${size}`} data-build={title}>
-                  <Visual />
-                  <div className="tile-copy">
-                    <div className="tile-top">
-                      <h3>{title}</h3>
-                      <span className="tile-stat mono">{stat}</span>
+              {WORK.map(({ id, size, Visual }) => {
+                const tile = t.work.tiles[id];
+                return (
+                  <article key={id} className={`work-tile ${size}`} data-build={tile.title}>
+                    <Visual />
+                    <div className="tile-copy">
+                      <div className="tile-top">
+                        <h3>{tile.title}</h3>
+                        <span className="tile-stat mono">{tile.stat}</span>
+                      </div>
+                      <p>{tile.line}</p>
                     </div>
-                    <p>{line}</p>
+                  </article>
+                );
+              })}
+            </div>
+            <p className="footnote">{t.work.footnote}</p>
+          </div>
+        </section>
+
+        <section className="services" id="services" data-build-section>
+          <div className="wrap">
+            <div className="services-head" data-build="Offer">
+              <p className="eyebrow">{t.services.eyebrow}</p>
+              <h2>{t.services.title}</h2>
+              <p>{t.services.lede}</p>
+            </div>
+            <div className="service-grid">
+              {t.services.items.map((s, i) => (
+                <article key={s.title} className="service" data-build={`Service 0${i + 1}`}>
+                  <span className="service-index mono">0{i + 1}</span>
+                  <h3>{s.title}</h3>
+                  <p>{s.text}</p>
+                  <div className="tags">
+                    {s.tags.map((tag) => (
+                      <span key={tag} className="tag">
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </article>
               ))}
             </div>
-            <p className="footnote">Illustrations of how each feature works. Product names belong to Open LMS.</p>
+            <div className="process" data-build="Process">
+              <h3>{t.services.processTitle}</h3>
+              <ol>
+                {t.services.process.map((step, i) => (
+                  <li key={step.title}>
+                    <span className="step mono">{i + 1}</span>
+                    <div>
+                      <strong>{step.title}</strong>
+                      <p>{step.text}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <div className="process-cta">
+                <a className="btn" href={mailto}>
+                  {t.services.cta} <ArrowRight size={16} aria-hidden="true" />
+                </a>
+                <a className="btn ghost" href="#ask">
+                  <MessageSquareText size={16} aria-hidden="true" /> {t.services.askFit}
+                </a>
+                <p className="process-note">{t.services.note}</p>
+              </div>
+            </div>
           </div>
         </section>
 
         <section className="ask-section" id="ask" data-build-section>
           <div className="wrap ask-grid">
             <div className="ask-intro" data-build="Intro">
-              <p className="eyebrow">Ask my AI</p>
-              <h2>Interview my resume.</h2>
-              <p>
-                Runs on Gemini Nano inside Chrome when your computer supports it, and on Gemini in the cloud when it doesn’t. It only
-                answers from my resume, in English or Spanish.
-              </p>
+              <p className="eyebrow">{t.ask.eyebrow}</p>
+              <h2>{t.ask.title}</h2>
+              <p>{t.ask.lede}</p>
             </div>
             <div data-build="Chat">
               <AskPanel />
@@ -290,12 +324,12 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
         <section className="experience" id="experience" data-build-section>
           <div className="wrap">
             <div className="section-head" data-build="Section">
-              <p className="eyebrow">Experience</p>
-              <h2>Five years, from research lab to production AI.</h2>
+              <p className="eyebrow">{t.experience.eyebrow}</p>
+              <h2>{t.experience.title}</h2>
             </div>
             <ol className="roles">
               {profile.experience.map((role) => (
-                <li key={role.title} className="role" data-build={role.company}>
+                <li key={role.company} className="role" data-build={role.company}>
                   <details>
                     <summary>
                       <span className="role-when mono">
@@ -333,15 +367,14 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
         <section className="projects-section" id="projects" data-build-section>
           <div className="wrap">
             <div className="section-head" data-build="Section">
-              <p className="eyebrow">Side projects</p>
-              <h2>Built outside the day job.</h2>
+              <p className="eyebrow">{t.projects.eyebrow}</p>
+              <h2>{t.projects.title}</h2>
             </div>
             <div className="projects">
-              {profile.projects
-                .filter((p) => p.name in PROJECT_ART)
-                .map((p) => (
-                  <article className="project" key={p.name} data-build={p.name}>
-                    <ProjectArt kind={PROJECT_ART[p.name as keyof typeof PROJECT_ART]} />
+              {profile.projects.map((p, i) =>
+                PROJECT_ART[i] ? (
+                  <article className="project" key={i} data-build={p.name}>
+                    <ProjectArt kind={PROJECT_ART[i]} />
                     <div className="project-copy">
                       <p className="eyebrow">
                         {p.kind} · {p.year}
@@ -359,7 +392,8 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
                       )}
                     </div>
                   </article>
-                ))}
+                ) : null,
+              )}
             </div>
           </div>
         </section>
@@ -384,7 +418,7 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
         <section className="creds-section" data-build-section>
           <div className="wrap creds">
             <div data-build="Certifications">
-              <p className="eyebrow">Certifications</p>
+              <p className="eyebrow">{t.creds.certifications}</p>
               <ul className="cert-cards">
                 {profile.certifications.map((c) => (
                   <li key={c.name} className={c.issuer.startsWith('Google') ? 'gc' : ''}>
@@ -401,7 +435,7 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
               </ul>
             </div>
             <div data-build="Education">
-              <p className="eyebrow">Education</p>
+              <p className="eyebrow">{t.creds.education}</p>
               <ul className="edu">
                 {profile.education.map((e) => (
                   <li key={e.name}>
@@ -414,7 +448,7 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
                 ))}
               </ul>
               <p className="langs">
-                <span className="eyebrow">Languages</span> {profile.languages.join(' · ')}
+                <span className="eyebrow">{t.creds.languages}</span> {profile.languages.join(' · ')}
               </p>
             </div>
           </div>
@@ -422,12 +456,12 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
 
         <section className="contact" id="contact">
           <div className="wrap">
-            <p className="eyebrow">Contact</p>
+            <p className="eyebrow">{t.contact.eyebrow}</p>
             <h2>
-              <span className="fill">Building something with AI? Let’s talk.</span>
+              <span className="fill">{t.contact.title}</span>
             </h2>
             <p className="email-line">
-              <a href={`mailto:${profile.email}`}>{profile.email}</a>
+              <a href={mailto}>{profile.email}</a>
             </p>
             <div className="actions">
               <CopyEmail className="btn" />
@@ -438,7 +472,7 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
                 GitHub <ArrowUpRight size={15} aria-hidden="true" />
               </a>
               <a className="btn ghost" href={profile.resumeUrl} target="_blank" rel="noopener">
-                Resume <ArrowDownToLine size={15} aria-hidden="true" />
+                {t.hero.resume} <ArrowDownToLine size={15} aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -451,9 +485,9 @@ export function ModernSite({ onRetro }: { onRetro: () => void }) {
             © {year} {profile.fullName}
           </span>
           <span>
-            Built with React, GSAP and Gemini Nano.{' '}
+            {t.footer.built}{' '}
             <button type="button" className="link-btn" onClick={onRetro}>
-              Open the retro desktop
+              {t.footer.retro}
             </button>
           </span>
         </div>
