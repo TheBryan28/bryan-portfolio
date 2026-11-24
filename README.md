@@ -1,73 +1,42 @@
-# React + TypeScript + Vite
+# Bryan Cruz · Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Personal site of Bryan Cruz, full-stack AI engineer. Live at https://bryan-dev-portfolio-sand.vercel.app
 
-Currently, two official plugins are available:
+Two views share the same data:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Modern view** (default): hero, AI assistant, experience timeline, projects, stack and contact. Animations use GSAP (SplitText, ScrollTrigger) and a canvas "swarm" around the portrait.
+- **Retro desktop**: the original Windows-style desktop, now with a real AI terminal. Open it from the header, or go to `/#retro`.
 
-## React Compiler
+## AI assistant
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The assistant answers only from `src/data/profile.ts`.
 
-## Expanding the ESLint configuration
+1. If the visitor's Chrome has **Gemini Nano** (built-in Prompt API, Chrome 148+ on desktop), answers are generated on the device.
+2. Otherwise the browser calls `api/chat.ts`, a Vercel Function that streams an answer from the **Gemini API**. The API key stays on the server.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Code: `src/ai/engine.ts` (routing and fallback), `src/ai/knowledge.ts` (system prompt), `api/chat.ts` (cloud fallback).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Run locally
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+cp .env.example .env.local   # then paste your Gemini API key
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open http://localhost:5173. `npm run dev` also serves `/api/chat`, so the cloud fallback works locally.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+To try the on-device path, use Chrome 148+ on a desktop that meets the Gemini Nano requirements and check `chrome://on-device-internals`.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Deploy
+
+Vercel builds every push to `main`. Set these in **Vercel > Project > Settings > Environment Variables**:
+
+| Name | Value |
+|---|---|
+| `GEMINI_API_KEY` | Your key from Google AI Studio |
+| `GEMINI_MODEL` | Optional. Defaults to `gemini-3.5-flash-lite` |
+
+## Update the content
+
+Edit `src/data/profile.ts`, and replace `public/Bryan_Cruz_Resume.pdf` when the resume changes.
