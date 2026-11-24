@@ -2,10 +2,39 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Bryan Cruz · Full-Stack AI Engineer</title>
+    <meta
+      name="description"
+      content="Bryan Cruz, full-stack AI engineer at Open LMS. Generative AI shipped to more than 600 production sites. Google Cloud Certified Associate Cloud Engineer and Generative AI Leader."
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Portfolio of Bryan Cruz, Senior Full Stack Engineer & AI Specialist. Expert in scalable architectures, Generative AI (RAG), and microservices." />
-    <title>Bryan Cruz | Senior Full Stack Engineer & AI Specialist</title>
+    <meta name="theme-color" content="#f3f4f1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1312" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Bryan Cruz · Full-Stack AI Engineer" />
+    <meta property="og:description" content="Generative AI shipped to more than 600 production sites. Ask my on-device AI assistant about my work." />
+    <meta property="og:image" content="https://bryan-dev-portfolio-sand.vercel.app/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://bryan-dev-portfolio-sand.vercel.app/" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=VT323&display=swap"
+    />
+    <script>
+      // Apply the saved or system theme before first paint.
+      try {
+        var t = localStorage.getItem('portfolio-theme');
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
