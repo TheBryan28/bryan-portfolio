@@ -90,13 +90,14 @@
 /* ---------- Desktop icons ---------- */
 .desktop-icons {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0 auto 0 0;
   z-index: 1;
-  padding: 16px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 8px 6px;
 }
 
 .desktop-icon {
@@ -182,10 +183,44 @@
 }
 
 .w95-title .controls .w95-button {
-  width: 20px;
-  height: 18px;
+  width: 22px;
+  height: 20px;
   padding: 0;
   justify-content: center;
+}
+
+.w95-title .controls .w95-button.close {
+  margin-left: 2px;
+}
+
+.w95-title .name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.w95-window {
+  outline: none;
+  touch-action: none;
+}
+
+.w95-window .w95-body {
+  touch-action: auto;
+}
+
+.w95-window.filled {
+  border-width: 0;
+  box-shadow: none !important;
+}
+
+.w95-resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background:
+    linear-gradient(135deg, transparent 50%, #808080 50%, #808080 56%, transparent 56%, transparent 68%, #808080 68%, #808080 74%, transparent 74%, transparent 86%, #808080 86%, #808080 92%, transparent 92%);
 }
 
 .w95-body {
@@ -376,6 +411,71 @@
   height: 32px;
 }
 
+.start-mark {
+  background: var(--w95-navy);
+  color: #fff;
+  font-size: 10px;
+  padding: 1px 4px;
+}
+
+.tray-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 6px;
+  cursor: pointer;
+  color: #000;
+}
+
+.tray-btn:hover {
+  border-color: var(--w95-border-dark);
+}
+
+.retro-chip.with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #1a3e8a;
+}
+
+.summary-box {
+  padding: 10px;
+  background: #fafafa;
+}
+
+.summary-box p {
+  margin: 0;
+}
+
+.retro-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.terminal .err {
+  color: #ff6b6b;
+}
+
+.services-win {
+  display: grid;
+  gap: 10px;
+}
+
+.service-list {
+  display: grid;
+  gap: 8px;
+}
+
+.service-list p {
+  margin: 0;
+}
+
 .start-btn {
   font-weight: bold;
 }
@@ -474,6 +574,15 @@
   .tray .clock {
     display: none;
   }
+  .task-list .task-label {
+    display: none;
+  }
+  .task-list .w95-button {
+    flex: 0 0 auto;
+  }
+  .start-menu {
+    width: min(260px, calc(100% - 8px));
+  }
 }
 
 /* ---------- Education tab ---------- */
@@ -567,4 +676,9 @@
   font-family: 'Courier New', monospace;
   font-size: 11px;
   color: var(--w95-navy);
+}
+
+.tray-btn .flag {
+  display: block;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
 }
