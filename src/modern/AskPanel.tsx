@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUp, Square, RotateCcw } from 'lucide-react';
+import { ArrowUp, Cloud, Laptop, Square, RotateCcw } from 'lucide-react';
 import { useAssistant } from '../ai/useAssistant';
 import { useLang } from '../i18n/LanguageContext';
 
@@ -26,19 +26,39 @@ export function AskPanel() {
     <div>
       <div className="ask">
         <div className="ask-bar">
-          <span className="engine-pill">
-            <span className="dot" />
-            {onDevice ? t.ask.onDevice : t.ask.cloud}
-          </span>
-          {ai.device === 'available' && (
-            <button type="button" className="link-btn" onClick={() => ai.setPreferDevice(!ai.preferDevice)} disabled={busy}>
-              {ai.preferDevice ? t.ask.useCloud : t.ask.useDevice}
-            </button>
-          )}
-          {ai.device === 'downloadable' && (
-            <button type="button" className="link-btn" onClick={ai.enableOnDevice}>
-              {t.ask.runLocal}
-            </button>
+          {ai.device === 'available' || ai.device === 'downloadable' || ai.device === 'downloading' ? (
+            // Visitors whose Chrome can run Gemini Nano pick where answers come from.
+            <div className="engine-switch" role="radiogroup" aria-label={t.ask.engineLabel}>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!onDevice}
+                className={!onDevice ? 'on' : ''}
+                disabled={busy}
+                onClick={() => ai.preferDevice && ai.setPreferDevice(false)}
+              >
+                <Cloud size={13} aria-hidden="true" /> {t.ask.cloud}
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={onDevice}
+                className={onDevice ? 'on' : ''}
+                disabled={busy || ai.device === 'downloading'}
+                title={ai.device === 'downloadable' ? t.ask.runLocal : undefined}
+                onClick={() => {
+                  if (ai.device === 'downloadable') ai.enableOnDevice();
+                  else if (!ai.preferDevice) ai.setPreferDevice(true);
+                }}
+              >
+                <Laptop size={13} aria-hidden="true" /> {t.ask.onDevice}
+              </button>
+            </div>
+          ) : (
+            <span className="engine-pill">
+              <span className="dot" />
+              {onDevice ? t.ask.onDevice : t.ask.cloud}
+            </span>
           )}
           {ai.downloadProgress !== null && (
             <span className="mono">
