@@ -73,6 +73,8 @@ export function AskPanel() {
           )}
         </div>
 
+        {ai.device === 'downloading' && <p className="ask-info">{t.ask.downloadingBg}</p>}
+
         <div className="ask-log" ref={logRef} aria-live="polite">
           {ai.messages.length === 0 ? (
             <div className="ask-empty">

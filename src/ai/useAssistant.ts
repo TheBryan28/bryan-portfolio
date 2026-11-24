@@ -54,6 +54,16 @@ export function useAssistant(): AssistantState {
     };
   }, []);
 
+  // Chrome keeps downloading Gemini Nano in the background, even after a
+  // reload. Check again every 20 seconds so the switch unlocks when it's ready.
+  useEffect(() => {
+    if (device !== 'downloading') return;
+    const timer = setInterval(() => {
+      onDeviceAvailability().then((a) => a !== 'downloading' && setDevice(a));
+    }, 20_000);
+    return () => clearInterval(timer);
+  }, [device]);
+
   const send = useCallback(
     (raw: string) => {
       const question = raw.trim().slice(0, MAX_QUESTION);
