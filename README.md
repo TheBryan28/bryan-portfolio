@@ -40,3 +40,10 @@ Vercel builds every push to `main`. Set these in **Vercel > Project > Settings >
 ## Update the content
 
 Edit `src/data/profile.ts`, and replace `public/Bryan_Cruz_Resume.pdf` when the resume changes.
+
+## Security
+
+- **Headers** (`vercel.json`): a strict Content Security Policy (scripts only from this site), no framing, `nosniff`, a referrer policy and HSTS.
+- **AI endpoint** (`api/chat.ts`): only accepts JSON from this site's own pages (Origin check), limits body size and conversation length, rate-limits each IP, times out after 30 seconds and never logs visitors' questions.
+- **API key**: lives only in Vercel's environment variables and `.env.local`, which git ignores. Never put it in `.env.example`.
+- **Recommended in the dashboards**: a Vercel WAF rate-limit rule on `/api/chat`, and in Google Cloud an API key restriction to the Generative Language API plus a daily quota cap.

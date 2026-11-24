@@ -10,6 +10,8 @@ import { SYSTEM_PROMPT } from '../src/ai/knowledge.js';
 const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
 const MAX_MESSAGES = 12;
 const MAX_CHARS = 1500;
+const MAX_BODY_BYTES = 24_000;
+const UPSTREAM_TIMEOUT_MS = 30_000;
 
 // Best-effort limit per visitor. Memory is per function instance, so this
 // slows abuse down but is not a hard guarantee; Google's own quota is the backstop.
@@ -51,12 +53,23 @@ export async function POST(request: Request): Promise<Response> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return text(503, 'Assistant not configured');
 
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'local';
+  // Only this site's own pages may call the endpoint. Browsers always send
+  // Origin on a POST, so scripts on other sites and bare curl calls are refused.
+  const origin = request.headers.get('origin');
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
+  if (!origin || !host || new URL(origin).host !== host) return text(403, 'Forbidden');
+  if (!request.headers.get('content-type')?.startsWith('application/json')) return text(415, 'Expected JSON');
+
+  // On Vercel, x-real-ip is set by the platform and cannot be spoofed by the client.
+  const ip =
+    request.headers.get('x-real-ip') ?? request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'local';
   if (rateLimited(ip)) return text(429, 'Too many questions, try again in a few minutes');
 
+  const raw = await request.text();
+  if (raw.length > MAX_BODY_BYTES) return text(413, 'Request too large');
   let messages: Turn[] | null;
   try {
-    messages = parseMessages(await request.json());
+    messages = parseMessages(JSON.parse(raw));
   } catch {
     messages = null;
   }
@@ -73,6 +86,8 @@ export async function POST(request: Request): Promise<Response> {
         contents: messages.map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })),
         generationConfig: { temperature: 0.3, maxOutputTokens: 1500 },
       }),
+      // Stop paying for tokens when the visitor leaves, and never hang forever.
+      signal: AbortSignal.any([request.signal, AbortSignal.timeout(UPSTREAM_TIMEOUT_MS)]),
     },
   );
 
