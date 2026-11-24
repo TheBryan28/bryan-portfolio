@@ -48,7 +48,51 @@ Rules:
 - Be brief: two to five sentences, or a short list. Plain text, no markdown headings.
 - Refer to Bryan in the third person.
 - Politely decline anything unrelated to Bryan's professional profile or services.
-- For project inquiries, say Bryan replies by email and point to the Services section.
+- If someone wants to hire Bryan or asks whether he could build something, say which of his services fits, mention related work from the profile, and invite them to email ${profile.email}.
 
 PROFILE
 ${brief()}`;
+
+// Gemini Nano is a small model: it does better with a short brief, plain
+// rules and two worked examples than with the full profile above.
+function compactFacts(): string {
+  const roles = profile.experience.map((r) => `- ${r.company} (${r.start} to ${r.end}), ${r.title}: ${r.summary}`).join('\n');
+  const wins = profile.experience[0].highlights.map((h) => `- ${h.label}: ${h.text.split('. ')[0]}.`).join('\n');
+  const projects = profile.projects.map((p) => `- ${p.name}: ${p.pitch}`).join('\n');
+  const skills = profile.skills.map((sk) => `${sk.group}: ${sk.items.slice(0, 6).join(', ')}`).join('; ');
+  return [
+    `Bryan Cruz, ${profile.title}, ${profile.location}. ${profile.availability}. Email: ${profile.email}.`,
+    'Work history:',
+    roles,
+    'Highlights at Open LMS:',
+    wins,
+    'Side projects:',
+    projects,
+    `Skills: ${skills}.`,
+    `Certifications: ${profile.certifications.map((c) => `${c.name} (${c.issuer}, ${c.year})`).join('; ')}.`,
+    `Education: ${profile.education.map((e) => `${e.name}, ${e.issuer}`).join('; ')}.`,
+    `Services he offers: ${STRINGS.en.services.items.map((sv) => sv.title).join('; ')}.`,
+    `Languages: ${profile.languages.join(', ')}.`,
+  ].join('\n');
+}
+
+export const NANO_PROMPT = `You answer questions about Bryan Cruz on his portfolio website.
+Use only the FACTS below. Answer in the same language as the question, in one to three short sentences, about Bryan in the third person.
+If the FACTS do not answer the question, say you don't know and give his email.
+
+FACTS
+${compactFacts()}`;
+
+export const NANO_EXAMPLES: { role: 'user' | 'assistant'; content: string }[] = [
+  { role: 'user', content: 'What does Bryan do now?' },
+  {
+    role: 'assistant',
+    content:
+      'Bryan leads the generative AI plugins at Open LMS. He shipped Nova, an AI course generator live on 649 sites, and tiny_ai_assistant, live on 666 sites.',
+  },
+  { role: 'user', content: '¿Podría construir un asistente con RAG para mi empresa?' },
+  {
+    role: 'assistant',
+    content: `Sí. Bryan construye funciones de IA como asistentes con RAG; lo hizo en VerifAI Wallet con Amazon Bedrock y en flujos bancarios con Pinecone y FAISS. Puedes escribirle a ${profile.email}.`,
+  },
+];

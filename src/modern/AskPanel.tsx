@@ -9,7 +9,7 @@ export function AskPanel() {
   const [input, setInput] = useState('');
   const logRef = useRef<HTMLDivElement>(null);
   const busy = ai.status === 'thinking' || ai.status === 'streaming';
-  const onDevice = ai.engine === 'on-device' || (!ai.engine && ai.device === 'available');
+  const onDevice = (ai.engine ?? ai.activeEngine) === 'on-device';
 
   useEffect(() => {
     const log = logRef.current;
@@ -30,6 +30,11 @@ export function AskPanel() {
             <span className="dot" />
             {onDevice ? t.ask.onDevice : t.ask.cloud}
           </span>
+          {ai.device === 'available' && (
+            <button type="button" className="link-btn" onClick={() => ai.setPreferDevice(!ai.preferDevice)} disabled={busy}>
+              {ai.preferDevice ? t.ask.useCloud : t.ask.useDevice}
+            </button>
+          )}
           {ai.device === 'downloadable' && (
             <button type="button" className="link-btn" onClick={ai.enableOnDevice}>
               {t.ask.runLocal}

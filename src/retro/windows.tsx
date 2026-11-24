@@ -252,7 +252,7 @@ export function TerminalContent({ onModern }: { onModern: () => void }) {
   // Only grab focus where there is a real keyboard, so phones don't pop one open.
   const finePointer = useMediaQuery('(pointer: fine)');
 
-  const engine = ai.device === 'available' ? t.retroUi.engineDevice : ai.device === 'checking' ? t.retroUi.engineChecking : t.retroUi.engineCloud;
+  const engine = ai.device === 'checking' ? t.retroUi.engineChecking : ai.activeEngine === 'on-device' ? t.retroUi.engineDevice : t.retroUi.engineCloud;
   const busy = ai.status === 'thinking' || ai.status === 'streaming';
 
   useEffect(() => {

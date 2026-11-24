@@ -12,6 +12,11 @@ export interface AssistantState {
   /** What Chrome reports for Gemini Nano on this machine. */
   device: LanguageModelAvailability | 'checking';
   downloadProgress: number | null;
+  /** The visitor chose the private on-device mode. */
+  preferDevice: boolean;
+  /** The engine the next question will use. */
+  activeEngine: Engine;
+  setPreferDevice: (value: boolean) => void;
   send: (question: string) => void;
   stop: () => void;
   reset: () => void;
@@ -19,6 +24,15 @@ export interface AssistantState {
 }
 
 const MAX_QUESTION = 500;
+const ENGINE_KEY = 'portfolio-ai-engine';
+
+function storedPreference(): boolean {
+  try {
+    return localStorage.getItem(ENGINE_KEY) === 'on-device';
+  } catch {
+    return false;
+  }
+}
 
 export function useAssistant(): AssistantState {
   const [messages, setMessages] = useState<ChatTurn[]>([]);
@@ -27,7 +41,9 @@ export function useAssistant(): AssistantState {
   const [engine, setEngine] = useState<Engine | null>(null);
   const [device, setDevice] = useState<AssistantState['device']>('checking');
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
+  const [preferDevice, setPreferDeviceState] = useState(storedPreference);
   const controller = useRef<AbortController | null>(null);
+  const activeEngine: Engine = preferDevice && device === 'available' ? 'on-device' : 'cloud';
 
   useEffect(() => {
     let alive = true;
@@ -50,11 +66,10 @@ export function useAssistant(): AssistantState {
 
       const ac = new AbortController();
       controller.current = ac;
-      const preferred: Engine = device === 'available' ? 'on-device' : 'cloud';
 
       (async () => {
         try {
-          for await (const chunk of ask(history, preferred, ac.signal, setEngine)) {
+          for await (const chunk of ask(history, activeEngine, device === 'available', ac.signal, setEngine)) {
             setStatus('streaming');
             setMessages((prev) => {
               const next = prev.slice();
@@ -75,7 +90,7 @@ export function useAssistant(): AssistantState {
         }
       })();
     },
-    [messages, status, device],
+    [messages, status, device, activeEngine],
   );
 
   const stop = useCallback(() => controller.current?.abort(), []);
@@ -88,6 +103,21 @@ export function useAssistant(): AssistantState {
     setStatus('idle');
   }, []);
 
+  // Switching engines starts a new conversation, since each keeps its own history.
+  const setPreferDevice = useCallback(
+    (value: boolean) => {
+      try {
+        localStorage.setItem(ENGINE_KEY, value ? 'on-device' : 'cloud');
+      } catch {
+        // The choice lasts for this visit only.
+      }
+      setPreferDeviceState(value);
+      reset();
+      setEngine(null);
+    },
+    [reset],
+  );
+
   // Starts the Gemini Nano download. Must be called from a click.
   const enableOnDevice = useCallback(() => {
     setDevice('downloading');
@@ -96,12 +126,13 @@ export function useAssistant(): AssistantState {
       .then(() => {
         setDevice('available');
         setDownloadProgress(null);
+        setPreferDevice(true);
       })
       .catch(() => {
         setDevice('unavailable');
         setDownloadProgress(null);
       });
-  }, []);
+  }, [setPreferDevice]);
 
-  return { messages, status, error, engine, device, downloadProgress, send, stop, reset, enableOnDevice };
+  return { messages, status, error, engine, device, downloadProgress, preferDevice, activeEngine, setPreferDevice, send, stop, reset, enableOnDevice };
 }

@@ -1,7 +1,8 @@
-import { SYSTEM_PROMPT } from './knowledge';
+import { NANO_EXAMPLES, NANO_PROMPT } from './knowledge';
 
-// Hybrid assistant: Gemini Nano inside Chrome when the visitor's machine has
-// it, otherwise the /api/chat function, which calls Gemini in the cloud.
+// Hybrid assistant. The cloud (/api/chat → Gemini) answers by default because
+// it gives the best answers. Visitors whose Chrome has Gemini Nano can switch
+// to a private on-device mode, and Nano also steps in if the cloud fails.
 
 export type Engine = 'on-device' | 'cloud';
 
@@ -48,7 +49,7 @@ export function openOnDeviceSession(onProgress?: (fraction: number) => void): Pr
     session = api
       .create({
         ...LANGUAGE_OPTIONS,
-        initialPrompts: [{ role: 'system', content: SYSTEM_PROMPT }],
+        initialPrompts: [{ role: 'system', content: NANO_PROMPT }, ...NANO_EXAMPLES],
         monitor(m) {
           m.addEventListener('downloadprogress', (e) => onProgress?.((e as ProgressEvent).loaded));
         },
@@ -99,25 +100,29 @@ async function* askCloud(history: ChatTurn[], signal: AbortSignal): AsyncGenerat
 export async function* ask(
   history: ChatTurn[],
   engine: Engine,
+  deviceReady: boolean,
   signal: AbortSignal,
   onEngine: (engine: Engine) => void,
 ): AsyncGenerator<string> {
   const question = history[history.length - 1].content;
-  if (engine === 'on-device') {
+  const first = engine;
+  const second: Engine | null = engine === 'cloud' ? (deviceReady ? 'on-device' : null) : 'cloud';
+  for (const current of [first, second]) {
+    if (!current) break;
     let produced = false;
     try {
-      onEngine('on-device');
-      for await (const chunk of askOnDevice(question, signal)) {
+      onEngine(current);
+      const stream = current === 'on-device' ? askOnDevice(question, signal) : askCloud(history, signal);
+      for await (const chunk of stream) {
         produced = true;
         yield chunk;
       }
       return;
     } catch (err) {
-      if (signal.aborted || produced) throw err;
-      // Nano failed before answering: fall through to the cloud.
-      resetOnDeviceSession();
+      // Give up if the visitor stopped it, an answer already started, or
+      // there is no other engine to try.
+      if (signal.aborted || produced || current === second || !second) throw err;
+      if (current === 'on-device') resetOnDeviceSession();
     }
   }
-  onEngine('cloud');
-  yield* askCloud(history, signal);
 }
